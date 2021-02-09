@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+import time
 
 
 def get_soup(url="https://smashmate.net/rate/1082871/"):
@@ -22,7 +23,7 @@ def get_infomation(soup):
     df["room_id"] = [room_id]
     _rate = [int(i.text) for i in soup.find_all("span", class_="rate_text")]
 
-    player_index = [i for i in links if "user" in i]
+    player_index = [i for i in links if "smashmate.net/user" in i]
     player1 = links.index(player_index[0])
     player2 = links.index(player_index[1])
     player1_links = links[player1:player2]
@@ -101,15 +102,24 @@ def check_room_exist(soup):
 def main():
     newest_room_id = get_newest_room_id()
     df = pd.DataFrame()
-    for i in tqdm(range(1, newest_room_id)):
-    # for i in tqdm(range(1, 10)):
+    filename = "sumamate_log.xlsx"
+    start = 1
+    resume = False
+    if resume:
+        df = pd.read_excel(filename)
+        start = 1
+    for i in tqdm(range(start, newest_room_id)):
+    # for i in tqdm(range(90, 130)):
         url = "https://smashmate.net/rate/" + str(i)
         soup = get_soup(url)
         if check_room_exist(soup):
             _df = get_infomation(soup)
+            _df = _df.reset_index().drop(columns=["index"])
             df = pd.concat([df, _df])
-    df = df.reset_index().drop(columns=["index"])
-    df.to_excel("sumamate_log.xlsx")
+            df.to_excel(filename)
+            #take 0.1 sec by above process
+            time.sleep(0.9)
+    df.to_excel(filename)
 
 
 if __name__ == "__main__":
