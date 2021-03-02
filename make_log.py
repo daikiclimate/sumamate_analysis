@@ -104,22 +104,27 @@ def main():
     df = pd.DataFrame()
     filename = "sumamate_log.xlsx"
     start = 1
-    resume = False
+    resume = True
+    # resume = False
     if resume:
-        df = pd.read_excel(filename)
-        start = 1
+        # df = pd.read_excel("tmp_" + filename)
+        # start = 16747
+        start = 157458
+        start += 1
     for i in tqdm(range(start, newest_room_id)):
-    # for i in tqdm(range(90, 130)):
+    # for i in tqdm(range(0, 30)):
+        t1 = time.time()
         url = "https://smashmate.net/rate/" + str(i)
         soup = get_soup(url)
         if check_room_exist(soup):
             _df = get_infomation(soup)
-            _df = _df.reset_index().drop(columns=["index"])
-            df = pd.concat([df, _df])
-            df.to_excel(filename)
-            #take 0.1 sec by above process
-            time.sleep(0.9)
-    df.to_excel(filename)
+            _df.to_excel(f"output/{str(i)}_data.xlsx")
+            # df = pd.concat([df, _df]).reset_index().drop(columns=["index"])
+            # df.to_excel(filename)
+        t2 = time.time()
+        if t2-t1 < 1:
+            time.sleep(round(1 - t2+t1,2))
+    # df.to_excel(filename)
 
 
 if __name__ == "__main__":
